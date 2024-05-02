@@ -1,0 +1,6 @@
+.metadata
+.vscode
+*/*/*/exe
+*/*/*/input
+*/*/*/output
+Misc
