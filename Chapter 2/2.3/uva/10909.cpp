@@ -1,74 +1,67 @@
-#include<cstdio>
+#include <bits/stdc++.h>
+using namespace std;
+#include <bits/extc++.h> // pbds
 #include<malloc.h>
 
-using namespace std;
+using namespace __gnu_pbds;
+typedef tree<int, null_type, less<int>, splay_tree_tag,
+tree_order_statistics_node_update> ost;
 
-long *arr;
+int main() {
+    int n = 2000000;
+    
+    ost tree;
+    for (int i = 1; i <= n; i+=2) // O(n log n)
+        tree.insert(i);
 
-bool isLucky(long);
-
-long getLucky(long pos){
-    if(arr[pos]!=0){
-        return arr[pos];
+    int currPos {1};
+    //process tree
+    auto it {++tree.begin()};
+    while(true){
+        int currD {*it};
+        
+        if(currD >= tree.size()){
+            break;
+        }
+        currD--;
+        
+        for(int i {currD}; i< tree.size(); i+=currD){
+            tree.erase(tree.find_by_order(i));
+        }
+    
+        ++it;
     }
     
-    long testVal {getLucky(pos-1)+1};
-    while(!isLucky(testVal)){
-        testVal+=2;
+    bool isLucky[n] {};
+    for(auto it {tree.begin()};it!=tree.end();++it){
+        isLucky[*it]=true;
     }
-    arr[pos] = testVal;
-    return testVal;
-}
-
-bool isLucky(long num){
-    if(num%2==0){
-        return false;
-    }
-
-    long residual {num - num/2};
-    long factorPos {2};
-    long factor;
-    while(factor=getLucky(factorPos), factor <= residual){
-        if(residual%factor == 0){
-            return false;
-        }
-        residual -= (residual/factor);
-        factorPos++;
-    }
-    arr[residual] = num;
-    return true;
-}
-
-
-int main(){
-    arr = (long*)calloc(1000001,sizeof(long));
-    arr[1] = 1;
-    arr[2] = 3;
-    arr[3] = 7;
-
-    long num;
-    while(scanf("%ld\n",&num)!=EOF){
-        if(num%2!=0){
-            printf("%ld is not the sum of two luckies!\n",num);
-        } else {
-            long seedNum {num/2};
-            bool didFind {false};
-            
-            if(seedNum%2==0){
-                seedNum--;
+    
+    int* dp = (int*)calloc(n+1,sizeof(int));
+    
+    
+    int val;
+    while (cin >> val) {
+		if (val & 1) {
+			cout << val << " is not the sum of two luckies!\n";
+		} else {
+		    if(dp[val] == 0){
+		        dp[val] = -1;
+		        
+		        for(int i=val/2;i>=1;--i){
+		            if(isLucky[i] && isLucky[val-i]){
+		                dp[val] = i;
+		                break;
+		            }
+		        }
+		    }
+		    
+            if(dp[val]==-1){
+                cout << val << " is not the sum of two luckies!\n";
+            } else {
+		        cout << val << " is the sum of " << dp[val] << " and " << val-dp[val] << ".\n";
             }
-            while(seedNum != 0){
-                if(isLucky(seedNum) && isLucky(num-seedNum)){
-                    printf("%ld is the sum of %ld and %ld.\n",num,seedNum,num-seedNum);
-                    didFind = true;
-                    break;
-                }
-                seedNum-=2;
-            }
-
-            if(!didFind){
-                printf("%ld is not the sum of two luckies!\n",num);
-            }
-        }
-    }
+		}
+	}
+	cout << flush;
 }
